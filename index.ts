@@ -43,11 +43,11 @@ function getConfig(): Config {
   return config
 }
 
-interface Relation {
-  source: string
-  target: string
-  kind?: string
-  location?: string
+interface RelationByTarget {
+  targetModule: string
+  targetFunc?: string
+  sourceModule: string
+  sourceLocation?: string
 }
 
 function isExternalLib(dep: IDependency): boolean {
@@ -74,7 +74,7 @@ async function extractCallgraph(config: Config) {
     const result = cruise([`${config.source}/**/*`])
     const output = result.output as ICruiseResult
 
-    const relations: Relation[] = []
+    const relations: RelationByTarget[] = []
     output.modules
       .filter(
         (module) =>
@@ -82,7 +82,7 @@ async function extractCallgraph(config: Config) {
           module.dependencies.filter(isExternalLib).length > 0,
       )
       .forEach((module) => {
-        const source = module.source.includes('./')
+        const sourceModule = module.source.includes('./')
           ? resolveModule(module.source, config.base)
           : module.source
 
@@ -93,7 +93,11 @@ async function extractCallgraph(config: Config) {
               ? dep.resolved
               : resolveModule(dep.resolved, config.base, true),
           )
-          .map((target) => ({ source, target, location: source }))
+          .map((targetModule) => ({
+            sourceModule,
+            targetModule,
+            sourceLoation: sourceModule,
+          }))
 
         relations.push(...newRelations)
       })
