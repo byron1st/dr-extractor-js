@@ -98,7 +98,7 @@ async function extractCallgraph(config: Config) {
             language: 'JavaScript',
             sourceModule,
             targetModule,
-            sourceLoation: sourceModule,
+            sourceLocation: sourceModule,
           }))
 
         relations.push(...newRelations)
