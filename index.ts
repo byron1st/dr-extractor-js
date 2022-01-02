@@ -44,6 +44,7 @@ function getConfig(): Config {
 }
 
 interface RelationByTarget {
+  language: string
   targetModule: string
   targetFunc?: string
   sourceModule: string
@@ -94,6 +95,7 @@ async function extractCallgraph(config: Config) {
               : resolveModule(dep.resolved, config.base, true),
           )
           .map((targetModule) => ({
+            language: 'JavaScript',
             sourceModule,
             targetModule,
             sourceLoation: sourceModule,
