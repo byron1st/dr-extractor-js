@@ -24,11 +24,20 @@ function getConfig(): Config {
       process.env.HOME ? process.env.HOME : '',
     )
   }
+
+  if (config.base.endsWith('/')) {
+    config.base = config.base.slice(0, config.base.length - 1)
+  }
+
   if (config.source.includes('$HOME')) {
     config.source = config.source.replace(
       '$HOME',
       process.env.HOME ? process.env.HOME : '',
     )
+  }
+
+  if (config.source.endsWith('/')) {
+    config.source = config.source.slice(0, config.source.length - 1)
   }
 
   return config
@@ -62,19 +71,14 @@ function resolveModule(
 
 async function extractCallgraph(config: Config) {
   try {
-    const result = cruise([config.source])
+    const result = cruise([`${config.source}/**/*`])
     const output = result.output as ICruiseResult
-    // const depsCount = output.modules.reduce((acc, module) => {
-    //   return acc + module.dependencies.length
-    // }, 0)
-
-    // console.log(depsCount)
 
     const relations: Relation[] = []
     output.modules
       .filter(
         (module) =>
-          module.source.includes('fabric-gateway-v2/src/') &&
+          path.resolve(module.source).includes(config.source) &&
           module.dependencies.filter(isExternalLib).length > 0,
       )
       .forEach((module) => {
